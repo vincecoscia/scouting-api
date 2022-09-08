@@ -23,7 +23,7 @@ exports.getFranchise = async (req, res, next) => {
     const franchise = await Franchise.findById(req.params.id)
 
     if(!franchise){
-      return res.status(400).json({ success: true})
+      return res.status(400).json({ success: false})
     }
 
     res.status(200).json({ success: true, data: franchise })
