@@ -10,12 +10,14 @@ const {
 
 const router = express.Router();
 
-router.route("/").get(getFranchises).post(createFranchise);
+const { protect } = require('../middleware/auth')
+
+router.route("/").get(getFranchises).post(protect, createFranchise);
 
 router
   .route("/:id")
   .get(getFranchise)
-  .put(updateFranchise)
-  .delete(deleteFranchise);
+  .put(protect, updateFranchise)
+  .delete(protect, deleteFranchise);
 
 module.exports = router;

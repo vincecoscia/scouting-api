@@ -28,8 +28,6 @@ exports.getFranchise = asyncHandler(async (req, res, next) => {
   }
 
   res.status(200).json({ success: true, data: franchise });
-
-  next(err);
 });
 
 // @desc    Create a Franchise
@@ -42,8 +40,6 @@ exports.createFranchise = asyncHandler(async (req, res, next) => {
     success: true,
     data: franchise,
   });
-
-  next(err);
 });
 
 // @desc    Update single Franchise
