@@ -1,3 +1,4 @@
+const ErrorResponse = require('../utils/errorResponse');
 const Franchise = require('../models/Franchise')
 
 // @desc    Get all Franchises
@@ -8,10 +9,10 @@ exports.getFranchises = async (req, res, next) => {
     const franchises = await Franchise.find();
 
     res.status(200).json({
-      success: true, data: franchises
+      success: true, count: franchises.length, data: franchises
     })
-  } catch (error) {
-    res.status(400).json({ success: false})
+  } catch (err) {
+    next(err)
   }
 }
 
@@ -23,12 +24,12 @@ exports.getFranchise = async (req, res, next) => {
     const franchise = await Franchise.findById(req.params.id)
 
     if(!franchise){
-      return res.status(400).json({ success: false})
+      return next(new ErrorResponse(`Franchise not found with id of ${req.params.id}`, 404))
     }
 
     res.status(200).json({ success: true, data: franchise })
-  } catch (error) {
-    res.status(400).json({ success: false })
+  } catch (err) {
+    next(err)
   }
 }
 
@@ -44,7 +45,7 @@ exports.createFranchise = async (req, res, next) => {
       data: franchise
     })
   } catch (err) {
-    res.status(400).json({ success: false})
+    next(err)
   }
 
 }
@@ -52,13 +53,36 @@ exports.createFranchise = async (req, res, next) => {
 // @desc    Update single Franchise
 // @route   Get /api/v1/franchises/:id
 // @access  Private
-exports.updateFranchise = (req, res, next) => {
-  res.status(200).json({ success: true, msg: `Update franchise ${req.params.id}`})
+exports.updateFranchise = async (req, res, next) => {
+  try {
+    const franchise = await Franchise.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
+    });
+    if(!franchise){
+      return next(new ErrorResponse(`Franchise not found with id of ${req.params.id}`, 404))
+    }
+  
+    res.status(200).json({ success: true, data: franchise})
+  } catch (err) {
+    next(err)
+  }
+
 }
 
 // @desc    Delete single Franchise
 // @route   Get /api/v1/franchises/:id
 // @access  Private
-exports.deleteFranchise = (req, res, next) => {
-  res.status(200).json({ success: true, msg: `Delete franchise ${req.params.id}`})
+exports.deleteFranchise = async (req, res, next) => {
+  try {
+    const franchise = await Franchise.findByIdAndDelete(req.params.id);
+    
+    if(!franchise){
+      return next(new ErrorResponse(`Franchise not found with id of ${req.params.id}`, 404))
+    }
+  
+    res.status(200).json({ success: true, data: {}})
+  } catch (err) {
+    next(err)
+  }
 }
