@@ -5,11 +5,18 @@ const jwt = require('jsonwebtoken')
 const UserSchema = new mongoose.Schema({
   username: {
     type: String,
+    unique: [true, 'Username is already in use'],
+    trim: true,
+    match: [
+      /^[a-zA-Z0-9]+$/,
+      "Please enter a valid username"
+    ],
     required: [true, "Please add username"],
   },
   email: {
     type: String,
     required: [true, "Please add an email"],
+    unique: true,
     match: [
       /^[a-zA-Z0-9_.+]+(?<!^[0-9]*)@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
       "Please enter a valid email",
@@ -32,6 +39,9 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+}, {
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true}
 });
 
 // Encrypt Passwords
@@ -51,5 +61,13 @@ UserSchema.methods.getSignedJwtToken = function() {
 UserSchema.methods.matchPassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password)
 }
+
+// Reverse populate with virtuals
+UserSchema.virtual('franchises', {
+  ref: 'Franchise',
+  localField: '_id',
+  foreignField: 'user',
+  justOne: false
+})
 
 module.exports = mongoose.model("User", UserSchema);

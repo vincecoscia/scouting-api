@@ -8,15 +8,18 @@ const {
   deleteFranchise,
 } = require("../controllers/franchises");
 
-const router = express.Router();
+const Franchise = require('../models/Franchise')
 
-const { protect } = require('../middleware/auth')
+const router = express.Router({ mergeParams: true});
 
-router.route("/").get(getFranchises).post(protect, createFranchise);
+const advancedResults = require('../middleware/advancedResults');
+const { protect, authorize } = require('../middleware/auth')
+
+router.route("/").get(protect, advancedResults(Franchise, 'user'), getFranchises).post(protect, createFranchise);
 
 router
   .route("/:id")
-  .get(getFranchise)
+  .get(protect, getFranchise)
   .put(protect, updateFranchise)
   .delete(protect, deleteFranchise);
 

@@ -15,6 +15,8 @@ connectDB();
 // Route files
 const franchises = require('./routes/franchises')
 const auth = require('./routes/auth')
+const users = require('./routes/users');
+const seasons = require('./routes/seasons');
 
 // Bring in express
 const app = express();
@@ -33,6 +35,8 @@ if(process.env.NODE_ENV === 'development') {
 // Mount routers
 app.use('/api/v1/franchises', franchises)
 app.use('/api/v1/auth', auth)
+app.use('/api/v1/users', users);
+app.use('/api/v1/seasons', seasons)
 
 app.use(errorHandler)
 
