@@ -9,10 +9,6 @@ const SeasonSchema = new mongoose.Schema({
     maxlength: [10, "Name can not be longer than 10 characters"],
   },
   slug: String,
-  class: {
-    type: Array,
-    default: []
-  },
   user: {
     type: mongoose.Schema.ObjectId,
     ref: 'User',
@@ -27,6 +23,18 @@ const SeasonSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+}, {
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true}
 });
+
+// Reverse populate with virtuals
+SeasonSchema.virtual('players', {
+  ref: 'Player',
+  localField: '_id',
+  foreignField: 'season',
+  justOne: false
+})
+
 
 module.exports = mongoose.model("Season", SeasonSchema);

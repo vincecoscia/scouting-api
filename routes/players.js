@@ -3,7 +3,8 @@ const multer = require('multer')
 const uuid = require("uuid").v4
 
 const {
-  createPlayers
+  createPlayers,
+  getPlayers
 } = require("../controllers/players");
 
 const Player = require('../models/Player')
@@ -34,7 +35,7 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({ storage, fileFilter, limits: {fileSize: 1000000} })
 
-router.route("/").post(upload.single("file"), createPlayers);
+router.route("/").post(protect,advancedResults(Player, 'season'), upload.single("file"), createPlayers).get(protect, getPlayers);
 
 // router.route('/:id').get(protect, advancedResults(Season, 'franchise'), getSeason)
 

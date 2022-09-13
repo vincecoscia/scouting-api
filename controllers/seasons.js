@@ -38,7 +38,7 @@ exports.getSeason = asyncHandler(async (req, res, next) => {
   }
 
   if (req.user.id === req.params.userId || req.user.role === 'admin') {
-    query = Season.findById(req.params.id);
+    query = Season.findById(req.params.id).populate('players');
   } else {
     return next(new ErrorResponse(`Invalid permissions`))
   }

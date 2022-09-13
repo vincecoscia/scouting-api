@@ -34,7 +34,7 @@ exports.getFranchises = asyncHandler(async (req, res, next) => {
 // @route   Get /api/v1/franchises/:id
 // @access  Private
 exports.getFranchise = asyncHandler(async (req, res, next) => {
-  const franchise = await Franchise.findById(req.params.id).populate('seasons');;
+  const franchise = await Franchise.findById(req.params.id).populate('seasons');
 
   if (!franchise) {
     return next(

@@ -12,6 +12,7 @@ const User = require('../models/User')
 // Include other resource routers
 const franchiseRouter = require('./franchises')
 const seasonRouter = require('./seasons')
+const playerRouter = require('./players')
 
 const router = express.Router();
 
@@ -21,6 +22,9 @@ const { protect, authorize } = require('../middleware/auth');
 // Re-route into other resource routers
 router.use('/:userId/franchises', franchiseRouter)
 router.use('/:userId/franchises/:franchiseId/seasons', seasonRouter)
+router.use('/:userId/franchises/:franchiseId/seasons/:seasonId/players', playerRouter)
+router.use('/:userId/franchises/:franchiseId/players', playerRouter)
+router.use('/:userId/players', playerRouter)
 
 router
   .route('/')

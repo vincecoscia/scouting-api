@@ -92,7 +92,18 @@ const PlayerSchema = new mongoose.Schema({
   CombineBroadJump: { type: String, trim: true },
   season: {
     type: mongoose.Schema.ObjectId,
-    ref: "Season"
+    ref: "Season",
+    required: true
+  },
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  franchise: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Franchise',
+    required: true
   },
   createdAt: {
     type: Date,
