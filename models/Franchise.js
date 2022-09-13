@@ -60,7 +60,18 @@ const FranchiseSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   }
+}, {
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true}
 });
+
+// Reverse populate with virtuals
+FranchiseSchema.virtual('seasons', {
+  ref: 'Season',
+  localField: '_id',
+  foreignField: 'franchise',
+  justOne: false
+})
 
 // Create franchise slug from name
 FranchiseSchema.pre('save', function(next) {

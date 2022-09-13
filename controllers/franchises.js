@@ -11,8 +11,8 @@ exports.getFranchises = asyncHandler(async (req, res, next) => {
 
   console.log(req.user);
 
-  if (req.params.userId) {
-    query = Franchise.find({ user: req.params.userId });
+  if (req.user.role === 'user') {
+    query = Franchise.find({ user: req.user.id });
   } else if(req.user.role === 'admin') {
     query = Franchise.find();
   } else {
@@ -21,7 +21,7 @@ exports.getFranchises = asyncHandler(async (req, res, next) => {
 
   // const franchises = await Franchise.find();
 
-  const franchises = await query;
+  const franchises = await query.populate('seasons');
 
   res.status(200).json({
     success: true,
@@ -34,7 +34,7 @@ exports.getFranchises = asyncHandler(async (req, res, next) => {
 // @route   Get /api/v1/franchises/:id
 // @access  Private
 exports.getFranchise = asyncHandler(async (req, res, next) => {
-  const franchise = await Franchise.findById(req.params.id);
+  const franchise = await Franchise.findById(req.params.id).populate('seasons');;
 
   if (!franchise) {
     return next(
