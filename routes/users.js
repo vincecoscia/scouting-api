@@ -13,6 +13,7 @@ const User = require('../models/User')
 const franchiseRouter = require('./franchises')
 const seasonRouter = require('./seasons')
 const playerRouter = require('./players')
+const reportRouter = require('./reports')
 
 const router = express.Router();
 
@@ -25,6 +26,7 @@ router.use('/:userId/franchises/:franchiseId/seasons', seasonRouter)
 router.use('/:userId/franchises/:franchiseId/seasons/:seasonId/players', playerRouter)
 router.use('/:userId/franchises/:franchiseId/players', playerRouter)
 router.use('/:userId/players', playerRouter)
+router.use('/:userId/franchises/:franchiseId/seasons/:seasonId/report', reportRouter)
 
 router
   .route('/')
@@ -34,7 +36,7 @@ router
 router
   .route('/:id')
   .get(getUser)
-  .put(updateUser)
-  .delete(deleteUser);
+  .put(authorize, updateUser)
+  .delete(authorize, deleteUser);
 
 module.exports = router;

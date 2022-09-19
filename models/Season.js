@@ -19,6 +19,7 @@ const SeasonSchema = new mongoose.Schema({
     ref: 'Franchise',
     required: true
   },
+  averageOverall: Number,
   createdAt: {
     type: Date,
     default: Date.now,

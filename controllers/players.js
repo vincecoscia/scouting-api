@@ -33,7 +33,12 @@ exports.createPlayers = asyncHandler(async (req, res, next) => {
       const players = csvData.map(data => ({ ...data, season: req.body.season, franchise: req.body.franchise, user: req.body.user}))
       Player.insertMany(players).then(async () => {
         console.log("Data inserted")
+        const dummyPlayer = await Player.create({ season: req.body.season, franchise: req.body.franchise, user: req.body.user })
+        console.log(dummyPlayer)
         await unlinkAsync(req.file.path)
+        .then( async () => {
+          await Player.findOneAndRemove({ OverallRating: null })
+        })
         res.status(201).json({ success: true })
       }).catch(function (err) {
         console.log(err)

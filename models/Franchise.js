@@ -51,6 +51,12 @@ const FranchiseSchema = new mongoose.Schema({
       "Washington Commanders"
     ]
   },
+  scouts: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: "Scout",
+    }
+  ],
   createdAt: {
     type: Date,
     default: Date.now
