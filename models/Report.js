@@ -10,6 +10,12 @@ const ReportSchema = new mongoose.Schema({
   defenseOverall: {
     type: Number
   },
+  best: {
+    type: Array
+  },
+  worst: {
+    type: Array
+  },
   qbOverall: {
     type: Number
   },

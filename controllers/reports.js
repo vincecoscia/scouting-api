@@ -55,11 +55,9 @@ exports.createReport = asyncHandler(async (req, res, next) => {
   let reportQuery = Report.find({ season: req.body.season })
   const reports = await reportQuery
 
-  // if (reports.length > 0) {
-  //   return next(new ErrorResponse(`A report has already been generated for this season`));
-  // }
-
-  // console.log(players.map(p => p.OverallRating))
+  if (reports.length > 0) {
+    return next(new ErrorResponse(`A report has already been generated for this season`));
+  }
 
   // Filter each position
   const qb = players.filter(player => player.Position === 'QB');
@@ -143,18 +141,18 @@ exports.createReport = asyncHandler(async (req, res, next) => {
     {avg: avgSs, position: 'SS'},
   ];
 
-  let bestArr = positions.sort((a, b) => b.avg - a.avg).slice(0,3)
-  let worstArr = positions.sort((a, b) => a.avg - b.avg).slice(0,3)
+  const bestArr = positions.sort((a, b) => b.avg - a.avg).slice(0,3)
+  const worstArr = positions.sort((a, b) => a.avg - b.avg).slice(0,3)
 
-  let bestPos = bestArr.map(pos => pos.position)
-  let worstPos = worstArr.map(pos => pos.position)
-
-  console.log(worstPos)
+  const bestPos = bestArr.map(pos => pos.position)
+  const worstPos = worstArr.map(pos => pos.position)
 
   // Add all fields to request object
   req.body.avgOverall = avgOverall
   req.body.offenseOverall = avgOffense
   req.body.defenseOverall = avgDefense
+  req.body.best = bestPos
+  req.body.worst = worstPos
   req.body.qbOverall = avgQb
   req.body.hbOverall = avgHb
   req.body.wrOverall = avgWr
