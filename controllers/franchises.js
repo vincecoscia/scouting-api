@@ -96,6 +96,7 @@ exports.updateFranchise = asyncHandler(async (req, res, next) => {
     );
   }
 
+  // Change this to Users or Seasons
   if (req.body.scouts) {
     let addedScout = await Scout.findById(req.body.scouts)
     let scouts = [...franchise.scouts, addedScout];
