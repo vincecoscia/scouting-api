@@ -1,4 +1,5 @@
 const ErrorResponse = require('../utils/errorResponse')
+const multer = require('multer')
 
 const errorHandler = (err, req, res , next) => {
   let error = {...err }
@@ -24,6 +25,24 @@ const errorHandler = (err, req, res , next) => {
   if(err.name === 'ValidationError') {
     const message = Object.values(err.errors).map(val => val.message)
     error = new ErrorResponse(message, 400)
+  }
+
+  // Multer error handling
+  if (err instanceof multer.MulterError) {
+    if(err.code === "LIMIT_FILE_SIZE") {
+      const message = 'File is too large'
+      error = new ErrorResponse(message, 400)
+    }
+
+    if(err.code === "LIMIT_FILE_COUNT") {
+      const message = 'Please only upload one file'
+      error = new ErrorResponse(message, 400)
+    }
+
+    if(err.code === "LIMIT_UNEXPECTED_FILE") {
+      const message = 'File must be a CSV'
+      error = new ErrorResponse(message, 400)
+    }
   }
 
   res.status(error.statusCode || 500).json({

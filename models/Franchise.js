@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
 const FranchiseSchema = new mongoose.Schema({
   name: {
@@ -50,10 +51,38 @@ const FranchiseSchema = new mongoose.Schema({
       "Washington Commanders"
     ]
   },
+  scouts: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: "Scout",
+    }
+  ],
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    required: true
   }
+}, {
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true}
+});
+
+// Reverse populate with virtuals
+FranchiseSchema.virtual('seasons', {
+  ref: 'Season',
+  localField: '_id',
+  foreignField: 'franchise',
+  justOne: false
+})
+
+// Create franchise slug from name
+FranchiseSchema.pre('save', function(next) {
+  this.slug = slugify(this.name, { lower: true });
+  next();
 });
 
 module.exports = mongoose.model('Franchise', FranchiseSchema)
