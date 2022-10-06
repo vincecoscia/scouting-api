@@ -32,6 +32,11 @@ const ScoutSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  hours: {
+    type: Number,
+    required: true,
+    default: 10,
+  },
   franchise: [
     {
       type: mongoose.Schema.ObjectId,

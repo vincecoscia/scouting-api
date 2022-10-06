@@ -20,7 +20,7 @@ exports.getReport = asyncHandler(async (req, res, next) => {
   if (req.params.seasonId) {
     query = Report.find({ season: req.params.seasonId });
   } else if (req.user.role === "admin") {
-    query = Player.find();
+    query = Report.find();
   } else {
     return next(new ErrorResponse(`Report not found`));
   }

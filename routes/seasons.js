@@ -3,7 +3,8 @@ const express = require("express");
 const {
   getSeasons,
   getSeason,
-  createSeason
+  createSeason,
+  updateSeason
 } = require("../controllers/seasons");
 
 const Season = require('../models/Season')
@@ -15,6 +16,6 @@ const { protect, authorize } = require('../middleware/auth')
 
 router.route("/").get(protect, advancedResults(Season, 'franchise'), getSeasons).post(protect, createSeason);
 
-router.route('/:id').get(protect, advancedResults(Season, 'franchise'), getSeason)
+router.route('/:id').get(protect, advancedResults(Season, 'franchise'), getSeason).put(protect, advancedResults(Season, 'franchise'), updateSeason)
 
 module.exports = router;
