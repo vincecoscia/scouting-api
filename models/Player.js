@@ -110,7 +110,10 @@ const PlayerSchema = new mongoose.Schema({
   info: {
     type: mongoose.Schema.ObjectId,
     ref: 'Info',
-    required: true
+  },
+  rank: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Rank',
   },
   createdAt: {
     type: Date,

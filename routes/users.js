@@ -16,6 +16,7 @@ const playerRouter = require('./players')
 const reportRouter = require('./reports')
 const scoutRouter = require('./scouts')
 const infoRouter = require('./info')
+const rankRouter = require('./rank')
 
 const router = express.Router();
 
@@ -31,6 +32,7 @@ router.use('/:userId/players', playerRouter)
 router.use('/:userId/franchises/:franchiseId/seasons/:seasonId/report', reportRouter)
 router.use('/:userId/franchises/:franchiseId/scouts', scoutRouter)
 router.use('/:userId/franchises/:franchiseId/players/:playerId/info', infoRouter)
+router.use('/:userId/franchises/:franchiseId/seasons/:seasonId/rank', rankRouter)
 
 router
   .route('/')

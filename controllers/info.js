@@ -28,7 +28,7 @@ exports.getInfos = asyncHandler(async (req, res, next) => {
 });
 
 // @desc    Create Info
-// @route   Get /api/v1/user/:userId/franchises/:franchiseId/players/:playerId/info/
+// @route   POST /api/v1/user/:userId/franchises/:franchiseId/players/:playerId/info/
 // @access  Public
 exports.createInfo = asyncHandler(async (req, res, next) => {
   // Check if info exists for this player
@@ -226,8 +226,8 @@ exports.createInfo = asyncHandler(async (req, res, next) => {
           ])
         )
       );
-      // Attach scoutedStats to req.body by adding key value pairs
-      scoutedStats.forEach((el) => Object.assign(req.body, el));
+      // Attach scoutedStats to req.body (If change is needed code can be found in evaluation === 4)
+      req.body.stats = scoutedStats;
     } else if (scout.evaluation === 2) {
       let overall =
         tempOverall + plusOrMinus() * Math.floor(Math.random() * 10);
@@ -241,8 +241,8 @@ exports.createInfo = asyncHandler(async (req, res, next) => {
           ])
         )
       );
-      // Attach scoutedStats to req.body by adding key value pairs
-      scoutedStats.forEach((el) => Object.assign(req.body, el));
+      // Attach scoutedStats to req.body (If change is needed code can be found in evaluation === 4)
+      req.body.stats = scoutedStats;
     } else {
       let overall =
         tempOverall + plusOrMinus() * Math.floor(Math.random() * 15);
@@ -256,8 +256,8 @@ exports.createInfo = asyncHandler(async (req, res, next) => {
           ])
         )
       );
-      // Attach scoutedStats to req.body by adding key value pairs
-      scoutedStats.forEach((el) => Object.assign(req.body, el));
+      // Attach scoutedStats to req.body (If change is needed code can be found in evaluation === 4)
+      req.body.stats = scoutedStats;
     }
   }
 
