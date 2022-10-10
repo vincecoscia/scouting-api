@@ -12,10 +12,37 @@ const Bucket = require("../models/Bucket");
 exports.getInfos = asyncHandler(async (req, res, next) => {
   let query;
 
-  if (req.user.role === "admin") {
-    query = Info.find();
+  // See if franchise exists
+  let franchise = await Franchise.findById(req.params.franchiseId);
+
+  // Check to see if user is franchise owner or admin
+  if (franchise.user.toString() !== req.user.id && req.user.role !== "admin") {
+    return next(
+      new ErrorResponse(
+        `User ${req.user.username} is not authorized to view this information`,
+        401
+      )
+    );
+  }
+
+  // If player exists, get all info for player
+  if (req.params.playerId) {
+    query = Info.find({
+      player: req.params.playerId,
+    });
+  } else if (req.params.seasonId) {
+    // If season exists, get all info for season
+    query = Info.find({
+      season: req.params.seasonId,
+    });
+  } else if (req.params.franchiseId) {
+    // If franchise exists, get all info for franchise
+    query = Info.find({
+      franchise: req.params.franchiseId,
+    });
   } else {
-    return next(new ErrorResponse(`Invalid permissions`));
+    // If no franchise, season, or player, get all info
+    query = Info.find();
   }
 
   const infos = await query;
@@ -127,6 +154,18 @@ exports.createInfo = asyncHandler(async (req, res, next) => {
     positionBucket = player.Position;
   }
 
+  // Create a variable for if player plays offense or defense
+  let offenseOrDefense;
+
+  // Check position of player and assign offenseOrDefense
+  if (
+    positionBucket.includes("QB" || "HB" || "WR" || "TE" || "FB" || "OL" || "K") 
+  ) {
+    offenseOrDefense = "Offense";
+  } else {
+    offenseOrDefense = "Defense";
+  }
+
   // identify the bucket
   let bucket = await Bucket.findOne({ position: positionBucket });
 
@@ -184,6 +223,35 @@ exports.createInfo = asyncHandler(async (req, res, next) => {
     return Math.random() < 0.5 ? -1 : 1;
   }
 
+  // Create a function that returns a value based on sparq score using switch statement
+  const sparqToNumber = (sparq) => {
+    switch (true) {
+      case sparq <= 50:
+        return -5;
+      case sparq <= 55:
+        return -4;
+      case sparq <= 60:
+        return -3;
+      case sparq <= 65:
+        return -2;
+      case sparq <= 70:
+        return -1;
+      case sparq <= 75:
+        return 0;
+      case sparq <= 80:
+        return 1;
+      case sparq <= 85:
+        return 2;
+      case sparq <= 90:
+        return 3;
+      case sparq <= 95:
+        return 4;
+      case sparq <= 100:
+        return 5;
+    }
+  }
+
+
   // generate the info based on scout and player
   function generateInfo(player, scout) {
     let tempOverall;
@@ -191,7 +259,9 @@ exports.createInfo = asyncHandler(async (req, res, next) => {
       tempOverall =
         player.OverallRating + devTraitToNumber(player.TraitDevelopment);
     } else if (scout.bias === "Athleticism") {
-      tempOverall = player.OverallRating + (sparqScore > 50 ? 5 : 0);
+      
+  console.log(sparqToNumber(sparqScore))
+      tempOverall = player.OverallRating + sparqToNumber(sparqScore);
     } else {
       tempOverall = player.OverallRating;
     }
@@ -265,15 +335,38 @@ exports.createInfo = asyncHandler(async (req, res, next) => {
 
   let newHours
 
-  // Add hours to existing hours
-  if (info) {
-    newHours = info.hours + req.body.hours;
-    newPercent = newHours * 2;
-  } else {
-    req.body.percent = req.body.hours * 2;
+  // Create a function that determines a multiplier of hours based on scout specialty matching positionBucket
+  function hoursMultiplier(hours) {
+    if (scout.specialty.includes(positionBucket)) {
+      return hours * 1.5;
+    } else if (scout.specialty === offenseOrDefense) {
+      return hours * 1.2;
+    } else {
+      return hours;
+    }
   }
 
-  console.log(newHours);
+  let requestedHours = req.body.hours;
+
+  // Create a function to determine if percent will be 100 or more. If so, set to 100
+  function percentCheck(percent) {
+    if (percent >= 100) {
+      return 100;
+    } else {
+      return percent;
+    }
+  }
+
+
+  // Add hours to existing hours
+  if (info) {
+    newHours = info.hours + requestedHours;
+    percentHours = (hoursMultiplier(newHours));
+    newPercent = percentCheck(percentHours * 2);
+  } else {
+    req.body.hours = requestedHours;
+    req.body.percent =  hoursMultiplier(requestedHours) * 2;
+  }
   // If info exists, only update hours and percentage
   if (info) {
     info = await Info.findOneAndUpdate(
@@ -287,6 +380,14 @@ exports.createInfo = asyncHandler(async (req, res, next) => {
   } else {
     // If info does not exist, create it
     info = await Info.create(req.body);
+    playerUpdate = await Player.findByIdAndUpdate(
+      req.params.playerId,
+      { info: info._id },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
   }
 
   res.status(200).json({

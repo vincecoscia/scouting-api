@@ -6,8 +6,10 @@ const BucketSchema = new mongoose.Schema({
     required: [true, 'Please add a position'],
     unique: true,
     enum: [
+      'Offense',
+      'Defense',
       'QB',
-      'RB',
+      'HB',
       'WR',
       'TE',
       'OL',

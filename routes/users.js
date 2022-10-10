@@ -31,7 +31,9 @@ router.use('/:userId/franchises/:franchiseId/players', playerRouter)
 router.use('/:userId/players', playerRouter)
 router.use('/:userId/franchises/:franchiseId/seasons/:seasonId/report', reportRouter)
 router.use('/:userId/franchises/:franchiseId/scouts', scoutRouter)
-router.use('/:userId/franchises/:franchiseId/players/:playerId/info', infoRouter)
+router.use('/:userId/franchises/:franchiseId/seasons/:seasonId/players/:playerId/info', infoRouter)
+router.use('/:userId/franchises/:franchiseId/seasons/:seasonId/info', infoRouter)
+router.use('/:userId/franchises/:franchiseId/info', infoRouter)
 router.use('/:userId/franchises/:franchiseId/seasons/:seasonId/rank', rankRouter)
 
 router

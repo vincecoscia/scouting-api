@@ -146,6 +146,81 @@ PlayerSchema.statics.getSeasonAverages = async function(seasonId) {
   console.log(obj)
 }
 
+// Static method to get avgerages
+PlayerSchema.statics.assignPlayerBucket = async function(playerId) {
+
+  // Initialize variable for an array of buckets
+  let buckets = []
+
+  // Get the player
+  const player = await this.findById(playerId)
+
+  // Grab position of player and assign multiple buckets based on position
+  const position = player.Position
+  if (position === 'QB') {
+    buckets = ['QB', 'Offense']
+  } else if (position === 'HB') {
+    buckets = ['HB', 'Offense']
+  } else if (position === 'WR') {
+    buckets = ['WR', 'Offense']
+  } else if (position === 'TE') {
+    buckets = ['TE', 'Offense']
+  } else if (position === 'LT') {
+    buckets = ['OL', 'Offense']
+  } else if (position === 'LG') {
+    buckets = ['OL', 'Offense']
+  } else if (position === 'C') {
+    buckets = ['OL', 'Offense']
+  } else if (position === 'RG') {
+    buckets = ['OL', 'Offense']
+  } else if (position === 'RT') {
+    buckets = ['OL', 'Offense']
+  } else if (position === 'LE') {
+    buckets = ['DL', 'Defense']
+  } else if (position === 'RE') {
+    buckets = ['DL', 'Defense']
+  } else if (position === 'DT') {
+    buckets = ['DL', 'Defense']
+  } else if (position === 'LOLB') {
+    buckets = ['LB', 'Defense']
+  } else if (position === 'MLB') {
+    buckets = ['LB', 'Defense']
+  } else if (position === 'ROLB') {
+    buckets = ['LB', 'Defense']
+  } else if (position === 'CB') {
+    buckets = ['CB', 'Defense']
+  } else if (position === 'FS') {
+    buckets = ['S', 'Defense']
+  } else if (position === 'SS') {
+    buckets = ['S', 'Defense']
+  } else if (position === 'K') {
+    buckets = ['K']
+  } else if (position === 'P') {
+    buckets = ['K']
+  }
+  
+  const obj = await this.aggregate([
+    {
+      $match: { _id: playerId }
+    },
+    {
+      $group: {
+        _id: '$player',
+        bucket: { $avg: '$OverallRating' }
+      }
+    }
+  ])
+
+  try {
+    await this.model('Season').findByIdAndUpdate(seasonId, {
+      averageOverall: Math.round(obj[0].averageOverall * 100) / 100
+    })
+  } catch (err) {
+    console.log(err)
+  }
+  console.log(obj)
+}
+
 // Call getSeasonAverages after save
 PlayerSchema.post('save', async function() {
   await this.constructor.getSeasonAverages(this.season)
@@ -154,6 +229,16 @@ PlayerSchema.post('save', async function() {
 // Call getSeasonAverages after remove
 PlayerSchema.post('remove', async function() {
   await this.constructor.getSeasonAverages(this.season)
+})
+
+// Call assignPlayerBucket after save
+PlayerSchema.post('save', async function() {
+  await this.constructor.assignPlayerBucket(this.player)
+})
+
+// Call assignPlayerBucket after remove
+PlayerSchema.post('remove', async function() {
+  await this.constructor.assignPlayerBucket(this.player)
 })
 
 module.exports = mongoose.model("Player", PlayerSchema);
