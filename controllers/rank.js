@@ -162,6 +162,34 @@ exports.createRanks = asyncHandler(async (req, res, next) => {
     return sparq;
   };
 
+  // Create a function that returns a value based on sparq score using switch statement
+  const sparqToNumber = (sparq) => {
+    switch (true) {
+      case sparq <= 50:
+        return -5;
+      case sparq <= 55:
+        return -4;
+      case sparq <= 60:
+        return -3;
+      case sparq <= 65:
+        return -2;
+      case sparq <= 70:
+        return -1;
+      case sparq <= 75:
+        return 0;
+      case sparq <= 80:
+        return 1;
+      case sparq <= 85:
+        return 2;
+      case sparq <= 90:
+        return 3;
+      case sparq <= 95:
+        return 4;
+      case sparq <= 100:
+        return 5;
+    }
+  };
+
   // generate the overall based on scout and player
   function generateOverall(player, scout) {
     // Determine Sparq score based on player attributes
@@ -173,7 +201,7 @@ exports.createRanks = asyncHandler(async (req, res, next) => {
       tempOverall =
         player.OverallRating + devTraitToNumber(player.TraitDevelopment);
     } else if (scout.bias === "Athleticism") {
-      tempOverall = player.OverallRating + (sparqScore > 50 ? 5 : 0);
+      tempOverall = player.OverallRating + sparqToNumber(sparqScore);
     } else {
       tempOverall = player.OverallRating;
     }

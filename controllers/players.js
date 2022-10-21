@@ -64,9 +64,9 @@ exports.getPlayers = asyncHandler(async (req, res, next) => {
 
   if (req.params.seasonId) {
     query = Player.find({ season: req.params.seasonId });
-  } else if (!req.params.seasonId) {
+  } else if (!req.params.seasonId && req.params.franchiseId) {
     query = Player.find({ franchise: req.params.franchiseId });
-  } else if (!req.params.seasonId && !req.params.franchiseId) {
+  } else if (!req.params.seasonId && !req.params.franchiseId && req.params.userId) {
     query = Player.find({ user: req.params.userId });
   } else if(req.user.role === 'admin') {
     query = Player.find();

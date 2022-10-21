@@ -64,7 +64,12 @@ app.use(limiter)
 app.use(hpp());
 
 // Enable CORS
-app.use(cors());
+// MUST COME BACK TO THIS
+app.use(cors({
+  origin:'http://localhost:3000', 
+  credentials:true,            //access-control-allow-credentials:true
+  optionSuccessStatus:200
+}));
 
 // Mount routers
 app.use("/api/v1/franchises", franchises);
