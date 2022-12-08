@@ -28,6 +28,7 @@ const scouts = require("./routes/scouts");
 const buckets = require("./routes/buckets");
 const info = require("./routes/info");
 const rank = require("./routes/rank");
+const news = require("./routes/news");
 
 // Bring in express
 const app = express();
@@ -79,8 +80,9 @@ app.use("/api/v1/seasons", seasons);
 app.use("/api/v1/players", players);
 app.use("/api/v1/scouts", scouts);
 app.use("/api/v1/buckets", buckets);
-app.use("api/v1/info", info);
-app.use("api/v1/rank", rank);
+app.use("/api/v1/info", info);
+app.use("/api/v1/rank", rank);
+app.use("/api/v1/news", news);
 
 app.use(errorHandler);
 

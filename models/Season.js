@@ -19,6 +19,11 @@ const SeasonSchema = new mongoose.Schema({
     ref: 'Franchise',
     required: true
   },
+  week: {
+    type: Number,
+    required: [true, "Please add a week"],
+    maxlength: [2, "Week can not be longer than 2 characters"],
+  },
   averageOverall: Number,
   createdAt: {
     type: Date,

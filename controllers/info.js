@@ -1,5 +1,6 @@
 const ErrorResponse = require("../utils/errorResponse");
 const asyncHandler = require("../middleware/async");
+const openaiComments = require("../utils/openai");
 const Info = require("../models/Info");
 const Scout = require("../models/Scout");
 const Franchise = require("../models/Franchise");
@@ -140,15 +141,30 @@ exports.createInfo = asyncHandler(async (req, res, next) => {
   let positionBucket;
 
   // Check position of player and assign positionBucket
-  if (player.Position.includes("RT" || "LT" || "RG" || "LG" || "C")) {
+  if (
+    player.Position.includes("RT") ||
+    player.Position.includes("LT") ||
+    player.Position.includes("C") ||
+    player.Position.includes("RG") ||
+    player.Position.includes("LG")
+  ) {
     positionBucket = "OL";
-  } else if (player.Position.includes("RE" || "LE" || "DT")) {
+  } else if (
+    player.Position.includes("RE") ||
+    player.Position.includes("LE") ||
+    player.Position.includes("DT")
+  ) {
     positionBucket = "DL";
-  } else if (player.Position.includes("MLB" || "LOLB" || "ROLB")) {
+    console.log(positionBucket);
+  } else if (
+    player.Position.includes("MLB") ||
+    player.Position.includes("LOLB") ||
+    player.Position.includes("ROLB")
+  ) {
     positionBucket = "LB";
-  } else if (player.Position.includes("FS" || "SS")) {
+  } else if (player.Position.includes("FS") || player.Position.includes("SS")) {
     positionBucket = "S";
-  } else if (player.Position.includes("K" || "P")) {
+  } else if (player.Position.includes("K") || player.Position.includes("P")) {
     positionBucket = "K";
   } else {
     positionBucket = player.Position;
@@ -159,7 +175,7 @@ exports.createInfo = asyncHandler(async (req, res, next) => {
 
   // Check position of player and assign offenseOrDefense
   if (
-    positionBucket.includes("QB" || "HB" || "WR" || "TE" || "FB" || "OL" || "K") 
+    positionBucket.includes("QB" || "HB" || "WR" || "TE" || "FB" || "OL" || "K")
   ) {
     offenseOrDefense = "Offense";
   } else {
@@ -188,17 +204,19 @@ exports.createInfo = asyncHandler(async (req, res, next) => {
     )
   );
 
+  console.log(relevantStats);
+
   // Assign player.TraitDevelopment to a number using a function
   devTraitToNumber = (trait) => {
     switch (trait) {
       case "Normal":
         return 0;
       case "Star":
-        return 1;
-      case "Superstar":
         return 2;
-      case "Xfactor":
+      case "Superstar":
         return 3;
+      case "Xfactor":
+        return 4;
       default:
         return 0;
     }
@@ -249,8 +267,7 @@ exports.createInfo = asyncHandler(async (req, res, next) => {
       case sparq <= 100:
         return 5;
     }
-  }
-
+  };
 
   // generate the info based on scout and player
   function generateInfo(player, scout) {
@@ -259,8 +276,7 @@ exports.createInfo = asyncHandler(async (req, res, next) => {
       tempOverall =
         player.OverallRating + devTraitToNumber(player.TraitDevelopment);
     } else if (scout.bias === "Athleticism") {
-      
-  console.log(sparqToNumber(sparqScore))
+      console.log(sparqToNumber(sparqScore));
       tempOverall = player.OverallRating + sparqToNumber(sparqScore);
     } else {
       tempOverall = player.OverallRating;
@@ -333,7 +349,7 @@ exports.createInfo = asyncHandler(async (req, res, next) => {
 
   generateInfo(player, scout);
 
-  let newHours
+  let newHours;
 
   // Create a function that determines a multiplier of hours based on scout specialty matching positionBucket
   function hoursMultiplier(hours) {
@@ -357,21 +373,76 @@ exports.createInfo = asyncHandler(async (req, res, next) => {
     }
   }
 
-
   // Add hours to existing hours
   if (info) {
     newHours = info.hours + requestedHours;
-    percentHours = (hoursMultiplier(newHours));
+    percentHours = hoursMultiplier(newHours);
     newPercent = percentCheck(percentHours * 2);
   } else {
-    req.body.hours = requestedHours;
-    req.body.percent =  hoursMultiplier(requestedHours) * 2;
+    let newHours = requestedHours;
+    let newPercent = hoursMultiplier(requestedHours) * 2;
+    req.body.hours = newHours;
+    req.body.percent = newPercent;
   }
-  // If info exists, only update hours and percentage
+  // 100 divided by the length of the array of relevantStats
+  let percentPerStat = 100 / bucket.relevantStats.length;
+  console.log(percentPerStat);
+
+  // Create a function that determines when to generate a comment based on how many times percent divided by percentPerStat
+  // Ex. if percent is 100 and percentPerStat is 20, then the function will return 5 - the number of info.comments already generated
+  function showComments(newPercent, percentPerStat) {
+    return Math.floor(newPercent / percentPerStat);
+  }
+
+  // Create a function that generates a comment for each relevantStat using openaiComments function
+  const generateComments = async (stats, position) => {
+    let comments = [];
+    await Promise.all(
+      stats.map(async (stat) => {
+        let statName = Object.keys(stat)[0];
+        let statValue = Object.values(stat)[0];
+        // let comment = await openaiComments() and pass in statName and statValue
+        let comment = await openaiComments(position, statName, statValue);
+        console.log(comment);
+        comments.push(comment);
+      })
+    );
+    // stats.forEach( async (stat) => {
+    //   let statName = Object.keys(stat)[0];
+    //   let statValue = Object.values(stat)[0];
+    //   // let comment = await openaiComments() and pass in statName and statValue
+    //   let comment = await openaiComments(position, statName, statValue);
+    //   console.log(comment);
+    //   return [...comments, comment];
+    // });
+    console.log(comments);
+    return comments;
+  };
+
+  // Call generateComments function and assign to variable if comments do not exist
   if (info) {
+    if (info.comments.length === 0) {
+      let comments = await generateComments(relevantStats, player.Position);
+      req.body.comments = comments;
+    }
+  }
+
+  // If info exists, but not comments, only update hours, percentage, and comments
+  if (info && info.comments.length > 0) {
     info = await Info.findOneAndUpdate(
       { player: req.params.playerId },
       { hours: newHours, percent: newPercent },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+  }
+  // If info exits and comments exist, only update hours and percentage
+  else if (info && info.comments.length === 0) {
+    info = await Info.findOneAndUpdate(
+      { player: req.params.playerId },
+      { hours: newHours, percent: newPercent, comments: req.body.comments },
       {
         new: true,
         runValidators: true,

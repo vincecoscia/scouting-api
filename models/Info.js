@@ -18,6 +18,11 @@ const InfoSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  comments: [
+    {
+      type: String,
+    },
+  ],
   OverallRating: { type: Number, trim: true },
   TraitDevelopment: { type: String, trim: true },
   OriginalHitPowerRating: { type: Number, trim: true },
